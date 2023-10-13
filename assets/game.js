@@ -1,9 +1,12 @@
+
 const selectors = {
     boardContainer: document.querySelector('.board-container'),
     board: document.querySelector('.board'),
     moves: document.querySelector('.moves'),
     timer: document.querySelector('.timer'),
     start: document.querySelector('button'),
+    player1: document.querySelector('p1'),
+    player2: document.querySelector('p2'),
     win: document.querySelector('.win')
 }
 
@@ -76,8 +79,8 @@ const startGame = () => {
     state.loop = setInterval(() => {
         state.totalTime++
 
-        selectors.moves.innerText = `${state.totalFlips} moves`
-        selectors.timer.innerText = `time: ${state.totalTime} sec`
+        selectors.moves.innerText = `${state.totalFlips} tentativas`
+        selectors.timer.innerText = `time: ${state.totalTime} seg`
     }, 1000)
 }
 
@@ -120,9 +123,9 @@ const flipCard = card => {
             selectors.boardContainer.classList.add('flipped')
             selectors.win.innerHTML = `
                 <span class="win-text">
-                    You won!<br />
-                    with <span class="highlight">${state.totalFlips}</span> moves<br />
-                    under <span class="highlight">${state.totalTime}</span> seconds
+                    Vitória!<br />
+                    with <span class="highlight">${state.totalFlips}</span> tentativas<br />
+                    under <span class="highlight">${state.totalTime}</span> segundos
                 </span>
             `
 
