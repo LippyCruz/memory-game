@@ -14,30 +14,6 @@ const io = socket(server);
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-function generate (){
-  const dimensions = selectors.board.getAttribute('data-dimension')
-
-  if (dimensions % 2 !== 0) {
-      throw new Error("The dimension of the board must be an even number.")
-  }
-
-  const emojis = ['🥔', '🍒', '🥑', '🌽', '🥕', '🍇', '🍉', '🍌', '🥭', '🍍']
-  const picks = pickRandom(emojis, (dimensions * dimensions) / 2) 
-  const items = shuffle([...picks, ...picks])
-  const cards = `
-      <div class="board" style="grid-template-columns: repeat(${dimensions}, auto)">
-          ${items.map(item => `
-              <div class="card">
-                  <div class="card-front"></div>
-                  <div class="card-back">${item}</div>
-              </div>
-          `).join('')}
-     </div>
-  `
-  
-  const parser = new DOMParser().parseFromString(cards, 'text/html')
-  return parser;
-}
 
 io.on("connection", (socket) => {
   
@@ -47,16 +23,18 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join", () => {
-    const p1 = {
+    let p1 = {
       id: 1,
       nome: "Jogador 1",
-      pontos: 0
+      pontos: 0,
+      turnos: 0
     };
 
-    const p2 = {
+    let p2 = {
       id: 2,
       nome: "Jogador 2",
-      pontos: 0
+      pontos: 0,
+      turnos: 0
     };
 
     if(users.isEmpty()){
@@ -73,24 +51,48 @@ io.on("connection", (socket) => {
     
   });
 
-socket.on("generate", () => {
-  generate();
 
-  io.sockets.emit(generate());
+  socket.on("changeTurn", (player) => {
+   if (user.map(jogador => jogador.id !== player.id)){
+     jogador.turnos = 1;
+   } else{
+    user.map(jogador2 => jogador2.id === player.id)
+    jogador2.turnos = 0;
+   }
+
+  });
+
+  socket.on("checkTurn", (player) => {
+  if (player.turnos === 1){
+    io.sockets.emit("yes");
+  }else{
+    io.sockets.emit("no");
+  }
+  });
+  
+
+socket.on("generate", (value) => {
+  const parser = value
+  io.sockets.emit(parser);
+});
+
+socket.on("givePoints", (currentplayer) => {
+  socket.broadcast.emit = (`Pontos para: ${currentplayer.nome}`);
+  currentplayer.pontos++;
 });
 
   socket.on("pointsP1", () => {
-    socket.emit = (pontos in users.p1);
+    io.sockets.emit = (pontos in users.p1);
 
   });
 
   socket.on("pointsP2", () => {
-    socket.emit = (pontos in users.p2);
+    io.sockets.emit = (pontos in users.p2);
 
   });
 
   socket.on("joined", () => {
-    socket.emit("joined", users);
+    io.sockets.emit("joined", users);
   });
 
   socket.on("flip", (data) => {
@@ -102,6 +104,7 @@ socket.on("generate", () => {
   socket.on("check", () => {
     if(users.length === 2){
       io.sockets.emit("start");
+      p1.turnos++;
     }
     else{
       io.sockets.emit("wait");

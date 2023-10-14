@@ -1,7 +1,7 @@
+
 const socket = io.connect("http://localhost:3000");
-socket.emit("joined");
-
-
+ socket.emit("joined");
+ 
 
 const selectors = {
     boardContainer: document.querySelector('.board-container'),
@@ -14,18 +14,15 @@ const selectors = {
     status: document.querySelector('.status')
 }
 
-selectors.start.classList.add('disabled');
-
-
-
-
 
 const state = {
     gameStarted: false,
     flippedCards: 0,
     totalFlips: 0,
     totalTime: 0,
-    loop: null
+    loop: null,
+    pointsP1: socket.emit("pointsP1"),
+    pointsP2: socket.emit("pointsP2")
 }
 
 const shuffle = array => {
@@ -57,17 +54,35 @@ const pickRandom = (array, items) => {
 }
 
 const givePoints= (currentplayerid) => {
-    if (currentplayerid === player1.id) {
-        state.pointsP1++
-    } else {
-        state.pointsP2++
-    }
+   socket.emit("givePoints", currentplayerid)
 }
 
 const generateGame = () => {
-    const parser = socket.emit("generate")
+    
+    const dimensions = selectors.board.getAttribute('data-dimension')
 
-    selectors.board.replaceWith(parser.querySelector('.board'))
+    if (dimensions % 2 !== 0) {
+        throw new Error("The dimension of the board must be an even number.")
+    }
+  
+    const emojis = ['🥔', '🍒', '🥑', '🌽', '🥕', '🍇', '🍉', '🍌', '🥭', '🍍']
+    const picks = pickRandom(emojis, (dimensions * dimensions) / 2) 
+    const items = shuffle([...picks, ...picks])
+    const cards = `
+        <div class="board" style="grid-template-columns: repeat(${dimensions}, auto)">
+            ${items.map(item => `
+                <div class="card">
+                    <div class="card-front"></div>
+                    <div class="card-back">${item}</div>
+                </div>
+            `).join('')}
+       </div>
+    `
+    
+    const parser = new DOMParser().parseFromString(cards, 'text/html')
+    socket.emit("generate", parser)
+    selectors.board.replaceWith(socket.emit("generate", parser).querySelector('.board'))
+
 }
 
 const startGame = () => {
@@ -102,7 +117,7 @@ const flipCard = card => {
 
     if (state.flippedCards === 2) {
         const flippedCards = document.querySelectorAll('.flipped:not(.matched)')
-
+        socket.emit("changeTurn", currentplayer)
         if (flippedCards[0].innerText === flippedCards[1].innerText) {
             flippedCards[0].classList.add('matched')
             flippedCards[1].classList.add('matched')
@@ -173,20 +188,33 @@ const attachEventListeners = () => {
         const eventTarget = event.target
         const eventParent = eventTarget.parentElement
 
+        if (socket.emit("checkTurn", currentplayer) ==='yes') {
+
+
+        }
+
         if (eventTarget.className.includes('card') && !eventParent.className.includes('flipped')) {
-            flipCard(eventParent)
+            if (socket.emit("checkTurn", currentplayer) ==='yes') {
+                flipCard(eventParent)
+           
+            } else {
+                console.log('Aguarde sua vez');
+                selectors.status.innerHTML = `Status: Aguarde sua vez`
+            }
+           
         } else if (eventTarget.className.includes('startButton') && !eventTarget.className.includes('disabled')) {
             if (socket.emit("join")=== 'full') {
                 alert('Sala cheia');
                 selectors.start.classList.add('disabled')
             } else if (socket.emit("check") ==='start') {
+                generateGame()
                 startGame()
             } else if (socket.emit("check") ==='wait'){
 
                 alert('Aguardando outro jogador');
                 selectors.status.innerHTML = `Status: Aguardando outro jogador...`
             } else {
-                currentplayer = socket.emit("join")
+                const currentplayer = socket.emit("join")
             }
 
             
@@ -195,5 +223,4 @@ const attachEventListeners = () => {
     })
 }
 
-generateGame()
 attachEventListeners()
