@@ -1,14 +1,24 @@
+const socket = io.connect("http://localhost:3000");
+socket.emit("joined");
+
+
 
 const selectors = {
     boardContainer: document.querySelector('.board-container'),
     board: document.querySelector('.board'),
-    moves: document.querySelector('.moves'),
+    points1: document.querySelector('.points1'),
+    points2: document.querySelector('.points2'),
     timer: document.querySelector('.timer'),
     start: document.querySelector('button'),
-    player1: document.querySelector('p1'),
-    player2: document.querySelector('p2'),
-    win: document.querySelector('.win')
+    win: document.querySelector('.win'),
+    status: document.querySelector('.status')
 }
+
+selectors.start.classList.add('disabled');
+
+
+
+
 
 const state = {
     gameStarted: false,
@@ -46,28 +56,16 @@ const pickRandom = (array, items) => {
     return randomPicks
 }
 
-const generateGame = () => {
-    const dimensions = selectors.board.getAttribute('data-dimension')
-
-    if (dimensions % 2 !== 0) {
-        throw new Error("The dimension of the board must be an even number.")
+const givePoints= (currentplayerid) => {
+    if (currentplayerid === player1.id) {
+        state.pointsP1++
+    } else {
+        state.pointsP2++
     }
+}
 
-    const emojis = ['🥔', '🍒', '🥑', '🌽', '🥕', '🍇', '🍉', '🍌', '🥭', '🍍']
-    const picks = pickRandom(emojis, (dimensions * dimensions) / 2) 
-    const items = shuffle([...picks, ...picks])
-    const cards = `
-        <div class="board" style="grid-template-columns: repeat(${dimensions}, auto)">
-            ${items.map(item => `
-                <div class="card">
-                    <div class="card-front"></div>
-                    <div class="card-back">${item}</div>
-                </div>
-            `).join('')}
-       </div>
-    `
-    
-    const parser = new DOMParser().parseFromString(cards, 'text/html')
+const generateGame = () => {
+    const parser = socket.emit("generate")
 
     selectors.board.replaceWith(parser.querySelector('.board'))
 }
@@ -79,8 +77,9 @@ const startGame = () => {
     state.loop = setInterval(() => {
         state.totalTime++
 
-        selectors.moves.innerText = `${state.totalFlips} tentativas`
-        selectors.timer.innerText = `time: ${state.totalTime} seg`
+        selectors.points1.innerText = `Pontuação (Jogador 1): ${state.pointsP1}`
+        selectors.points2.innerText = `Pontuação (Jogador 2): ${state.pointsP2}`
+        selectors.timer.innerText = `Tempo: ${state.totalTime} seg`
     }, 1000)
 }
 
@@ -96,10 +95,7 @@ const flipCard = card => {
     state.flippedCards++
     state.totalFlips++
 
-    if (!state.gameStarted) {
-        startGame()
-    }
-
+    
     if (state.flippedCards <= 2) {
         card.classList.add('flipped')
     }
@@ -110,6 +106,8 @@ const flipCard = card => {
         if (flippedCards[0].innerText === flippedCards[1].innerText) {
             flippedCards[0].classList.add('matched')
             flippedCards[1].classList.add('matched')
+            currentplayerid = socket.emit("pointsP1")
+
         }
 
         setTimeout(() => {
@@ -119,18 +117,54 @@ const flipCard = card => {
 
     // If there are no more cards that we can flip, we won the game
     if (!document.querySelectorAll('.card:not(.flipped)').length) {
+        
+        if (selectors.points1 === selectors.points2) {
+
         setTimeout(() => {
             selectors.boardContainer.classList.add('flipped')
             selectors.win.innerHTML = `
                 <span class="win-text">
-                    Vitória!<br />
-                    with <span class="highlight">${state.totalFlips}</span> tentativas<br />
+                    Empate!<br />
+                    with <span class="highlight">${state.points1}</span> pontos<br />
                     under <span class="highlight">${state.totalTime}</span> segundos
                 </span>
             `
 
             clearInterval(state.loop)
         }, 1000)
+
+    } else if (selectors.points1 > selectors.points2){
+        setTimeout(() => {
+            selectors.boardContainer.classList.add('flipped')
+            selectors.win.innerHTML = `
+                <span class="win-text">
+                Vitória de ${player1.nome}<br />
+                    with <span class="highlight">${state.points1}</span> pontos<br />
+                    under <span class="highlight">${state.totalTime}</span> segundos
+                </span>
+            `
+
+            clearInterval(state.loop)
+        }, 1000)
+
+
+    } else {
+        setTimeout(() => {
+            selectors.boardContainer.classList.add('flipped')
+            selectors.win.innerHTML = `
+                <span class="win-text">
+                        Vitória de ${player2.nome}<br />
+                    with <span class="highlight">${state.points1}</span> pontos<br />
+                    under <span class="highlight">${state.totalTime}</span> segundos
+                </span>
+            `
+
+            clearInterval(state.loop)
+        }, 1000)
+
+    }
+
+    
     }
 }
 
@@ -141,8 +175,22 @@ const attachEventListeners = () => {
 
         if (eventTarget.className.includes('card') && !eventParent.className.includes('flipped')) {
             flipCard(eventParent)
-        } else if (eventTarget.nodeName === 'BUTTON' && !eventTarget.className.includes('disabled')) {
-            startGame()
+        } else if (eventTarget.className.includes('startButton') && !eventTarget.className.includes('disabled')) {
+            if (socket.emit("join")=== 'full') {
+                alert('Sala cheia');
+                selectors.start.classList.add('disabled')
+            } else if (socket.emit("check") ==='start') {
+                startGame()
+            } else if (socket.emit("check") ==='wait'){
+
+                alert('Aguardando outro jogador');
+                selectors.status.innerHTML = `Status: Aguardando outro jogador...`
+            } else {
+                currentplayer = socket.emit("join")
+            }
+
+            
+            
         }
     })
 }

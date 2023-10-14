@@ -9,22 +9,25 @@
         <link rel="stylesheet" href="/assets/styles.css" />
         <script src=""></script>
 
-        <script src="/server.js" defer></script>
-        <script src="assets/game.js" defer></script>
+        <script src="/socket.io/socket.io.js"></script>
+        
     </head>
     <body>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/public/js/game.js"></script>
         <div class="game">
             <div class="controls">
-                <button>Começar</button>
+                <button class="startButton">Começar</button>
                 <div class="stats">
-                    <div class="moves">0 tentativas</div>
-                    <div class="timer">tempo: 0 seg</div>
+                    <div class="points1">Pontuação (Jogador 1): </div>
+                    <div class="points2">Pontuação (Jogador 2): </div>
+                    <div class="timer">Tempo: 0 seg</div>
                     <div class="timer">Status: </div>
                 </div>
             </div>
             <div class="board-container">
                 <div class="board" data-dimension="4"></div>
-                <div class="win">Vitória!</div>
+                <div class="win"></div>
             </div>
         </div>
     </body>
