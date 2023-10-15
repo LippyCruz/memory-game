@@ -1,6 +1,6 @@
 
 const socket = io.connect("http://localhost:3000");
- socket.emit("joined");
+
  
 
 const selectors = {
@@ -21,9 +21,12 @@ const state = {
     totalFlips: 0,
     totalTime: 0,
     loop: null,
-    pointsP1: socket.emit("pointsP1"),
-    pointsP2: socket.emit("pointsP2")
+    pointsP1: 0,
+    pointsP2: 0
 }
+
+
+
 
 const shuffle = array => {
     const clonedArray = [...array]
@@ -91,7 +94,8 @@ const startGame = () => {
 
     state.loop = setInterval(() => {
         state.totalTime++
-
+        state.pointsP1 = socket.emit("pointsP1")
+        state.pointsP1 = socket.emit("pointsP2")
         selectors.points1.innerText = `Pontuação (Jogador 1): ${state.pointsP1}`
         selectors.points2.innerText = `Pontuação (Jogador 2): ${state.pointsP2}`
         selectors.timer.innerText = `Tempo: ${state.totalTime} seg`
