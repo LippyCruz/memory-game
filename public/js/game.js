@@ -121,7 +121,7 @@ const flipCard = card => {
         if (flippedCards[0].innerText === flippedCards[1].innerText) {
             flippedCards[0].classList.add('matched')
             flippedCards[1].classList.add('matched')
-            currentplayerid = socket.emit("pointsP1")
+            socket.emit("givePoints", currentplayer)
 
         }
 
@@ -133,7 +133,7 @@ const flipCard = card => {
     // If there are no more cards that we can flip, we won the game
     if (!document.querySelectorAll('.card:not(.flipped)').length) {
         
-        if (selectors.points1 === selectors.points2) {
+        if (socket.emit("result") ==='draw') {
 
         setTimeout(() => {
             selectors.boardContainer.classList.add('flipped')
@@ -148,7 +148,7 @@ const flipCard = card => {
             clearInterval(state.loop)
         }, 1000)
 
-    } else if (selectors.points1 > selectors.points2){
+    } else if (socket.emit("result") ==='winP1'){
         setTimeout(() => {
             selectors.boardContainer.classList.add('flipped')
             selectors.win.innerHTML = `

@@ -1,25 +1,22 @@
-const express = require("express");
-const socket = require("socket.io");
-const http = require("http");
-
+const express = require('express');
 const app = express();
-const PORT = 3000 || process.env.PORT;
+const http = require('http');
 const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 
-// Set static folder
-app.use(express.static("public"));
+app.get('/', (req, res) => {
+  res.sendFile('public\index.html'); 
+});
 
-// Socket setup
-const io = socket(server);
-
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(3000, () => {
+  console.log('listening on *:3000');
+});
 
 
 io.on("connection", (socket) => {
   
-  
-
-    console.log("Made socket connection", socket.id);
+      console.log("Made socket connection", socket.id);
   });
 
   socket.on("join", () => {
@@ -75,6 +72,20 @@ socket.on("generate", (value) => {
   const parser = value
   io.sockets.emit(parser);
 });
+
+
+socket.on("result", () => {
+  if(users.p1.pontos === users.p2.pontos){
+    io.sockets.emit("draw");
+  } else if(users.p1.pontos > users.p2.pontos){
+    io.sockets.emit("winP1");
+  }
+  else{
+    io.sockets.emit("winP2");
+  }
+});
+
+
 
 socket.on("givePoints", (currentplayer) => {
   socket.broadcast.emit = (`Pontos para: ${currentplayer.nome}`);

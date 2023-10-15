@@ -7,13 +7,11 @@
         <title>Jogo da Memória</title>
 
         <link rel="stylesheet" href="/public/css/styles.css" />
-        <script src=""></script>
-
-        <script src="/socket.io/socket.io.js"></script>
         
+          
     </head>
     <body>
-        <script src="/socket.io/socket.io.js"></script>
+        
         <script src="/public/js/game.js"></script>
         <div class="game">
             <div class="controls">
@@ -30,5 +28,9 @@
                 <div class="win"></div>
             </div>
         </div>
+<script src="/node_modules/socket.io/dist/socket.js"></script>
+<script>
+  var socket = io();
+</script>
     </body>
 </html>
