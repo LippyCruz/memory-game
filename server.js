@@ -18,13 +18,13 @@ server.listen(3000, () => {
 io.on("connection", (socket) => {
 
 
-  if (connections < 2){ 
+  if (connections < 2){
 
   console.log("Made socket connection", socket.id);
 
   for(let userCount =1; userCount < 2; userCount++){
     let p = {
-      id: userCount,
+      id: socket.id,
       nome: `Jogador ${userCount}`,
       pontos: 0,
       turnos: 0
@@ -35,45 +35,43 @@ io.on("connection", (socket) => {
   } else{
     console.log("Too many connections");
     socket.disconnect();
-    app.get('/', (req, res) => {
-      res.sendFile(__dirname + '/public/404.html');
-    });
+    
   }
 
   
+   function currentPlayer(socket) {
+    return p.find(player => player.id === socket.id)
+  }
 
+  function playerOne(socket) {
+    return p.find(player => player.nome === 'Jogador 1')
+  }
+
+  function playerTwo(socket) {
+    return p.find(player => player.nome === 'Jogador 2')
+  }
 
 
   socket.on("join", () => {
     
-    
-    if(users.isEmpty()){
-      users.push(p);
-      io.sockets.emit(p);
-    }
-    else if(users.length === 1){
-      users.push(p);
-      io.sockets.emit(p);
-    }
-    else{
-      io.sockets.emit("full");
-    }
+    console.log(`${currentPlayer.nome} joined`);
     
     });
     
     
-    socket.on("changeTurn", (player) => {
-    if (user.map(jogador => jogador.id !== player.id)){
-     jogador.turnos = 1;
-    } else{
-    user.map(jogador2 => jogador2.id === player.id)
-    jogador2.turnos = 0;
+    socket.on("changeTurn", () => {
+    if (currentPlayer(socket).turnos === 1){
+     playerOne.turnos = 0;
+    } else if(currentPlayer(socket).turnos === 0){
+      playerTwo.turnos = 1;
     }
+    
+    
     
     });
     
     socket.on("checkTurn", (player) => {
-    if (player.turnos === 1){
+    if (currentPlayer().turnos === 1){
     io.sockets.emit("yes");
     }else{
     io.sockets.emit("no");

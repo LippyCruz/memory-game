@@ -25,7 +25,9 @@ const state = {
     pointsP2: 0
 }
 
-
+socket.on("startgame", () => {
+    startGame()
+  });
 
 
 const shuffle = array => {
@@ -82,9 +84,10 @@ const generateGame = () => {
        </div>
     `
     
-    const parser = new DOMParser().parseFromString(cards, 'text/html')
-    socket.emit("generate", parser)
-    selectors.board.replaceWith(socket.emit("generate", parser).querySelector('.board'))
+    
+    const parser = new DOMParser().parseFromString(socket.emit("generate", cards), 'text/html')
+  
+    selectors.board.replaceWith(parser.querySelector('.board'))
 
 }
 
@@ -188,14 +191,11 @@ const flipCard = card => {
 }
 
 const attachEventListeners = () => {
+    
     document.addEventListener('click', event => {
-        const eventTarget = event.target
+            const eventTarget = event.target
         const eventParent = eventTarget.parentElement
 
-        if (socket.emit("checkTurn", currentplayer) ==='yes') {
-
-
-        }
 
         if (eventTarget.className.includes('card') && !eventParent.className.includes('flipped')) {
             if (socket.emit("checkTurn", currentplayer) ==='yes') {
@@ -211,7 +211,7 @@ const attachEventListeners = () => {
                 alert('Sala cheia');
                 selectors.start.classList.add('disabled')
             } else if (socket.emit("check") ==='start') {
-                generateGame()
+                
                 startGame()
             } else if (socket.emit("check") ==='wait'){
 
@@ -220,11 +220,9 @@ const attachEventListeners = () => {
             } else {
                 const currentplayer = socket.emit("join")
             }
-
-            
-            
+         
         }
     })
 }
-
+generateGame()
 attachEventListeners()
