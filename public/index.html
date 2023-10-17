@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Jogo da Memória</title>
 
-        <link rel="stylesheet" href="/styles.css" />
+        <link rel="stylesheet" href="./styles.css" />
         <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
          
     </head>
@@ -15,13 +15,16 @@
         
         <div class="game">
             <div class="controls">
-                <button class="readyButton">Pronto</button>
+                <button class="readyButton">Começar</button>
                 <div class="stats">
-                    <div class="points1">Pontuação (Jogador 1): </div>
-                    <div class="points2">Pontuação (Jogador 2): </div>
+                    <div class="points">Pontuação: </div>
                     <div class="timer">Tempo: 0 seg</div>
                     <div class="status">Status: </div>
+                    <div class="config">
+                    <span>Dimensões: </span>
+                    <input name="dimensions" type="number" value="4" class="dimensions" step="2" min="4" max="6" style="resize: none;" cols="10" rows="5" ></input></div>
                 </div>
+                
             </div>
             <div class="board-container">
                 <div class="board" ></div>
