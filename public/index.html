@@ -8,23 +8,23 @@
 
         <link rel="stylesheet" href="/styles.css" />
         <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
-                  
+         
     </head>
     <body>
         
         
         <div class="game">
             <div class="controls">
-                <button class="startButton">Começar</button>
+                <button class="readyButton">Pronto</button>
                 <div class="stats">
                     <div class="points1">Pontuação (Jogador 1): </div>
                     <div class="points2">Pontuação (Jogador 2): </div>
                     <div class="timer">Tempo: 0 seg</div>
-                    <div class="timer">Status: </div>
+                    <div class="status">Status: </div>
                 </div>
             </div>
             <div class="board-container">
-                <div class="board" data-dimension="4"></div>
+                <div class="board" ></div>
                 <div class="win"></div>
             </div>
         </div>
