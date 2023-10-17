@@ -19,7 +19,7 @@ let count = 0;
 const users = [];
 
 
-// game logic functions
+// logica do jogo
 
 const shuffle = array => { // embaralha as cartas
   const clonedArray = [...array]
@@ -84,11 +84,6 @@ if (count <= 1){
 
 console.log("Made socket connection", socket.id);
 
-socket.data.id = socket.id;
-socket.data.nome = `Jogador ${count}`;
-socket.data.pontos = 0;
-socket.data.turnos = 0;
-users.push(socket);
    
   } else{
     console.log("Too many connections");
@@ -113,7 +108,25 @@ users.push(socket);
     
     });
     
+    socket.on("winner", (nome, pontos, tempo) => {
+      
+      const Jogador = {
+        nome: nome,
+        pontos: pontos,
+        tempo: `${tempo} seg`
+      }
+      console.log("Vencedor: ", nome, pontos, tempo);
+      users.push(Jogador);
+    
+  });
   
+  socket.on("getRank", () => {
+    console.log("Rank solicitado");
+   const rank = users.sort((x,y) => y.pontos-x.pontos);
+  
+  socket.emit("rank",rank.splice(0,3));
+  console.log("rank enviado");
+  });
     
    
     socket.on("disconnect", () => {

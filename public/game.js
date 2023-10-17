@@ -10,12 +10,13 @@ const selectors = {
     timer: document.querySelector('.timer'),
     start: document.querySelector('button'),
     win: document.querySelector('.win'),
-    dimensions: document.querySelector('.dimensions')
+    dimensions: document.querySelector('.dimensions'),
+    nomeJogador: document.querySelector('.nomeJogador')
 }
 
+let nomeJogador;
 
 const state = {
-    gameStarted: false,
     flippedCards: 0,
     totalTime: 0,
     loop: null,
@@ -36,7 +37,7 @@ selectors.board.replaceWith(parser.parseFromString(data, 'text/html').querySelec
 
   
 const startGame = () => {
-    state.gameStarted = true
+    
     state.loop = setInterval(() => {
         state.totalTime++
         selectors.points.innerText = `Pontuação : ${state.points}`
@@ -55,10 +56,6 @@ const flipBackCards = () => {
 const flipCard = card => {
     state.flippedCards++
     state.totalFlips++
-
-    if (!state.gameStarted) {
-        startGame()
-    }
 
     if (state.flippedCards <= 2) {
         card.classList.add('flipped')
@@ -80,18 +77,43 @@ const flipCard = card => {
 
     // If there are no more cards that we can flip, we won the game
     if (!document.querySelectorAll('.card:not(.flipped)').length) {
-        setTimeout(() => {
-            selectors.boardContainer.classList.add('flipped')
-            selectors.win.innerHTML = `
-                <span class="win-text">
-                    Você venceu!<br />
-                    com <span class="highlight">${state.pontos}</span>pontos<br />
-                    em apenas <span class="highlight">${state.totalTime}</span> seconds
-                </span>
-            `
-
-            clearInterval(state.loop)
-        }, 1000)
+        socket.emit("winner", nomeJogador, state.points, state.totalTime);
+        socket.emit("getRank");
+        socket.on("rank", (arrayRank) => {
+            
+            setTimeout(() => {
+                selectors.boardContainer.classList.add('flipped')
+                selectors.win.innerHTML = `
+                    <span class="win-text">
+                        Você venceu!<br />
+                        com <span class="highlight">${state.points}</span> pontos<br />
+                        em apenas <span class="highlight">${state.totalTime}</span> segundos
+                    </span>
+                    <span class="rank">
+                        <h3>Ranking</h3>
+                        <table>
+                        <tr>
+                          <th>Posição</th>
+                          <th>Nome</th>
+                          <th>Pontos</th>
+                          <th>Tempo</th>
+                        </tr>
+                        ${arrayRank.map((user, index) => `<tr>
+                            <td>${index +1}º</td>
+                            <td>${user.nome}</td>
+                            <td>${user.pontos} pontos</td>
+                            <td>${user.tempo}</td>
+                          </tr>
+                          `).join('')}
+                        </table>
+                    </span>
+    
+                `
+            
+                clearInterval(state.loop)
+            }, 1000)
+        });
+        selectors.start.classList.remove('disabled')
     }
 }
 
@@ -106,9 +128,11 @@ const attachEventListeners = () => {
         const eventParent = eventTarget.parentElement
 
         if (eventTarget.className.includes('readyButton') && !eventTarget.className.includes('disabled')) {
+            nomeJogador = selectors.nomeJogador.value;
             socket.emit("ready", selectors.dimensions.value)
             selectors.start.classList.add('disabled')
             selectors.dimensions.classList.add('disabled')
+            selectors.nomeJogador.classList.add('disabled')
         }
         
         else if (eventTarget.className.includes('card') && !eventParent.className.includes('flipped')) {

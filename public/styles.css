@@ -138,6 +138,12 @@ button {
     color: #282A3A;
 }
 
+
+.rank {
+    display:grid
+    
+}
+
 .highlight {
     color: #6f00fc;
 }
