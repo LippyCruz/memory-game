@@ -12,6 +12,8 @@ html {
 
 .dimensions{
     font-size: 1.3rem;
+    margin: none .5rem;
+    height: max-content;
 }
 
 .game {
@@ -45,6 +47,12 @@ button {
 .stats {
     color: #FFF;
     font-size: 14pt;
+    
+}
+
+.stats > div{
+    margin: 1rem .3rem;
+    
 }
 
 .board-container {

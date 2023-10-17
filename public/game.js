@@ -10,7 +10,6 @@ const selectors = {
     timer: document.querySelector('.timer'),
     start: document.querySelector('button'),
     win: document.querySelector('.win'),
-    msgstatus: document.querySelector('.status'),
     dimensions: document.querySelector('.dimensions')
 }
 
